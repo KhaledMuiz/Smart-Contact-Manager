@@ -3,9 +3,7 @@
 # Smart Contact Manager
 A full-stack web application for managing personal and professional contacts efficiently. Built with Node.js, Express, SQLite, and vanilla JavaScript.
 
-## sample landing page
 ![Landing Page Sample](src/images/landingpage-sample.png)
-## sample dashboard
 ![Dashboard Page Sample](src/images/dashboard-sample.png)
 
 
