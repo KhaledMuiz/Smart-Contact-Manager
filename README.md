@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Smart Contact Manager
 
 A full-stack web application for managing personal and professional contacts efficiently. Built with Node.js, Express, SQLite, and vanilla JavaScript.
@@ -223,3 +224,7 @@ This project is licensed under the ISC License.
 ## Author
 
 Built as a demonstration of full-stack web development with modern JavaScript technologies.
+=======
+# Smart-Contact-Manager
+Smart Contact Manager: A modern, secure, and user-friendly contact management system to effortlessly organize and access your VIP contacts
+>>>>>>> b4911ecbb509963536f0ff4a29ec6280411b73f5
