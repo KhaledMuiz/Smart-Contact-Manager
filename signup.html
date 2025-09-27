@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Smart Contact Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="header">
+        <button class="back-btn" onclick="window.history.back()">&larr;</button>
+        <div class="logo">Smart Contact Manager</div>
+    </header>
+    <div class="auth-page">
+    <main class="auth-container">
+        <section class="form-box">
+            <h2>Create an Account</h2>
+            <form>
+                <div class="input-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <div class="input-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="btn">Sign Up</button>
+                <p class="redirect-text">Already have an account? <a href="login.html">Login</a></p>
+            </form>
+        </section>
+    </main>
+</div>
+
+    <script>
+function showPopup(message, isError = false) {
+    const popup = document.getElementById('popup');
+    const icon = document.getElementById('popup-icon');
+    const msg = document.getElementById('popup-message');
+    msg.textContent = message;
+    icon.textContent = isError ? '⚠️' : '✅';
+    popup.classList.toggle('error', isError);
+    popup.classList.add('show');
+    setTimeout(() => popup.classList.remove('show'), 3000);
+}
+
+document.querySelector('form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    // Basic validation
+    if (!name || !email || !password || !confirmPassword) {
+        showPopup('Please fill in all fields.', true);
+        return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        showPopup('Please enter a valid email.', true);
+        return;
+    }
+    if (password !== confirmPassword) {
+        showPopup('Passwords do not match.', true);
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showPopup(data.error || 'Signup failed', true);
+            return;
+        }
+
+        showPopup('Sign up successful!');
+        // Save token to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+    } catch (error) {
+        showPopup('Network error. Please try again.', true);
+    }
+});
+</script>
+
+<div id="popup" class="popup">
+    <span id="popup-icon">⚠️</span>
+    <span id="popup-message"></span>
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Contact Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .btn-group .btn {
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+        .btn-group .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-group .btn-check:checked + .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+        .input-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <button class="back-btn" onclick="window.history.back()">&larr;</button>
+        <div class="logo">Smart Contact Manager</div>
+    </header>
+<div class="auth-page">
+    <main class="auth-container">
+        <section class="form-box">
+            <h2>Login to Your Account</h2>
+            <form>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <div class="input-group">
+                    <label>Login as:</label>
+                    <div class="d-flex justify-content-center">
+                        <div class="btn-group" role="group" aria-label="Login role">
+                            <input type="radio" class="btn-check" name="role" id="user" value="user" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="user">👤 User</label>
+                            <input type="radio" class="btn-check" name="role" id="admin" value="admin" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="admin">👑 Admin</label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Login</button>
+                <p class="redirect-text">Don't have an account? <a href="signup.html">Sign Up</a></p>
+            </form>
+        </section>
+    </main>
+</div>
+
+    <script>
+function showPopup(message, isError = false) {
+    const popup = document.getElementById('popup');
+    const icon = document.getElementById('popup-icon');
+    const msg = document.getElementById('popup-message');
+    msg.textContent = message;
+    icon.textContent = isError ? '⚠️' : '✅';
+    popup.classList.toggle('error', isError);
+    popup.classList.add('show');
+    setTimeout(() => popup.classList.remove('show'), 3000);
+}
+
+document.querySelector('form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const role = document.querySelector('input[name="role"]:checked').value;
+
+    // Basic validation
+    if (!email || !password) {
+        showPopup('Please fill in all fields.', true);
+        return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        showPopup('Please enter a valid email.', true);
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, role })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showPopup(data.error || 'Login failed', true);
+            return;
+        }
+
+        showPopup('Login successful!');
+        // Save token to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Redirect based on role
+        const redirectPage = data.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+        setTimeout(() => window.location.href = redirectPage, 1000);
+    } catch (error) {
+        showPopup('Network error. Please try again.', true);
+    }
+});
+</script>
+
+<div id="popup" class="popup">
+    <span id="popup-icon">⚠️</span>
+    <span id="popup-message"></span>
+</div>
+
+</body>
+
+</html>

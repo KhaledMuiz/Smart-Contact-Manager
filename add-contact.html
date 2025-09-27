@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Add Contact - Smart Contact Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo">
+            <i class="fa-solid fa-address-book"></i>
+            <span>Smart Contact Manager</span>
+        </div>
+        <nav class="navbar">
+            <div class="hamburger">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="contacts.html">Contacts</a></li>
+                <li><a href="#logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="auth-page">
+        <main class="auth-container">
+            <section class="form-box">
+                <h2>Add New Contact</h2>
+<form id="addContactForm" enctype="multipart/form-data">
+            <div class="input-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter full name" required />
+            </div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter email" required />
+            </div>
+            <div class="input-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter phone number" required />
+            </div>
+            <div class="input-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" name="address" placeholder="Enter address" />
+            </div>
+
+            <!-- Modern Category Segmented Control -->
+            <div class="modern-input-group">
+                <label>Category</label>
+                <div class="segmented-control" role="radiogroup" aria-label="Category">
+                    <input type="radio" id="category-personal" name="category" value="personal" checked />
+                    <label for="category-personal" tabindex="0"><i class="fa-solid fa-user"></i> Personal</label>
+
+                    <input type="radio" id="category-work" name="category" value="work" />
+                    <label for="category-work" tabindex="0"><i class="fa-solid fa-briefcase"></i> Work</label>
+                </div>
+            </div>
+
+            <!-- Modern Notes Textarea with Character Counter -->
+            <div class="modern-input-group textarea-container">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" class="expandable-textarea" placeholder="Enter additional notes" maxlength="500"></textarea>
+                <div class="character-counter" id="notesCounter">0 / 500</div>
+            </div>
+
+            <!-- Modern Profile Image Upload with Preview -->
+            <div class="modern-input-group">
+                <label>Profile Image</label>
+                <div class="image-preview-container">
+                    <img id="profileImagePreview" class="image-preview" alt="Profile Image Preview" />
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                        <p>Drag & drop an image or click to select</p>
+                        <input type="file" id="profile_image" name="profile_image" accept="image/*" />
+                    </div>
+                </div>
+                <small>Or choose from existing images:</small>
+                <select id="existing_image" name="existing_image">
+                    <option value="">No image</option>
+                    <option value="abiye.jpg">Abiye</option>
+                    <option value="adv1.jpg">Adv1</option>
+                    <option value="ahmeds avatar.jpg">Ahmed's Avatar</option>
+                    <option value="asd.png">ASD</option>
+                    <option value="cv,1.jpg">CV1</option>
+                    <option value="mng.jpg">MNG</option>
+                    <option value="pr2.jpg">PR2</option>
+                    <option value="ramzi.avatar.jpg">Ramzi Avatar</option>
+                    <option value="secn.jpg">SECN</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="is_favorite">
+                    <input type="checkbox" id="is_favorite" name="is_favorite" />
+                    Mark as Favorite
+                </label>
+            </div>
+            <button type="submit" class="btn">Save Contact</button>
+        </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="popup" id="successPopup">
+        <div class="popup-content">
+            <span class="checkmark">✔</span>
+            <p>Contact saved successfully!</p>
+        </div>
+    </div>
+
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+
+        // Logout link
+        const logoutLink = document.querySelector('a[href="#logout"]');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+        }
+
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        });
+
+        const form = document.getElementById('addContactForm');
+        const popup = document.getElementById('successPopup');
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Character counter for notes
+        const notesTextarea = document.getElementById('notes');
+        const notesCounter = document.getElementById('notesCounter');
+
+        notesTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            notesCounter.textContent = `${count} / 500`;
+        });
+
+        // Image preview and drag-and-drop functionality
+        const profileImageInput = document.getElementById('profile_image');
+        const profileImagePreview = document.getElementById('profileImagePreview');
+        const imageUploadArea = document.getElementById('imageUploadArea');
+        const existingImageSelect = document.getElementById('existing_image');
+
+        // Handle file selection
+        profileImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                displayImagePreview(file);
+                existingImageSelect.value = ''; // Clear existing image selection
+            }
+        });
+
+        // Handle existing image selection
+        existingImageSelect.addEventListener('change', function() {
+            if (this.value) {
+                profileImagePreview.src = `./src/images/${this.value}`;
+                profileImagePreview.style.display = 'block';
+                profileImageInput.value = ''; // Clear file input
+            } else {
+                profileImagePreview.style.display = 'none';
+            }
+        });
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            imageUploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            imageUploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            imageUploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            imageUploadArea.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            imageUploadArea.classList.remove('dragover');
+        }
+
+        imageUploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    profileImageInput.files = files;
+                    displayImagePreview(file);
+                    existingImageSelect.value = '';
+                }
+            }
+        }
+
+        function displayImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profileImagePreview.src = e.target.result;
+                profileImagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            // If user selected an existing image, send it as existing_image
+            if (existingImageSelect.value) {
+                formData.append('existing_image', existingImageSelect.value);
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/contacts', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const newContact = await response.json();
+                    // Clear inputs
+                    form.reset();
+                    existingImageSelect.value = '';
+                    profileImagePreview.style.display = 'none';
+                    notesCounter.textContent = '0 / 500';
+
+                    // Redirect to the detail page of the newly added contact
+                    window.location.href = `contact-detail.html?id=${newContact.id}`;
+                } else {
+                    const data = await response.json();
+                    if (data.error === 'Invalid or expired token') {
+                        alert('Your session has expired. Please log in again.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                    } else {
+                        alert(data.error || 'Error adding contact');
+                    }
+                }
+            } catch (error) {
+                console.error('Error adding contact:', error);
+                alert('Error adding contact');
+            }
+        });
+    </script>
+</body>
+
+</html>
