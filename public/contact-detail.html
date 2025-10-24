@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Details | Modern Address Book</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/contact-detail.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back to Contacts
+            </button>
+            <div class="logo">
+                <i class="fa-solid fa-address-book"></i>
+                <span>Smart Contact Manager</span>
+            </div>
+        </header>
+
+        <div class="contact-content">
+            <div class="contact-profile">
+                    <img src="" alt="Contact avatar" class="avatar">
+                    <h2 class="contact-name">Loading...</h2>
+                    <span class="contact-type">Loading...</span>
+                    <span class="favorite-badge" style="display: none;"><i class="fas fa-star"></i> Favorite</span>
+                </div>
+
+            <div class="contact-details">
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <i class="fas fa-envelope"></i>
+                        <h3>Email Address</h3>
+                    </div>
+                    <p class="contact-info">
+                        <i class="fas fa-circle" style="font-size: 8px; color: var(--success);"></i>
+                        <a href="mailto:"></a>
+                    </p>
+                </div>
+
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <i class="fas fa-phone"></i>
+                        <h3>Phone Numbers</h3>
+                    </div>
+                    <p class="contact-info">
+                        <i class="fas fa-mobile-alt" style="color: var(--primary);"></i>
+                        <a href="tel:"></a>
+                    </p>
+                </div>
+
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Address</h3>
+                    </div>
+                    <p class="contact-info">
+                        <i class="fas fa-building" style="color: var(--accent);"></i>
+                    </p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="editContact()">
+                        <i class="fas fa-edit"></i> Edit Contact
+                    </button>
+                    <button class="btn btn-outline" onclick="shareContact()">
+                        <i class="fas fa-share-alt"></i> Share Contact
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteContact()">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+
+                <div class="additional-info">
+                    <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+                    <p>No additional information available.</p>
+                </div>
+
+
+        <!-- Slide-in Edit Panel -->
+        <div id="editPanel" class="side-panel">
+            <div class="panel-header">
+                <h2>Edit Contact</h2>
+                <button class="close-btn" onclick="closeEditPanel()">&times;</button>
+            </div>
+            <div class="panel-content">
+                <form id="editForm" enctype="multipart/form-data">
+                    <div class="modern-input-group">
+                        <label for="editName">Full Name</label>
+                        <input type="text" id="editName" name="name" required>
+                    </div>
+                    <div class="modern-input-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail" name="email" required>
+                    </div>
+                    <div class="modern-input-group">
+                        <label for="editPhone">Phone</label>
+                        <input type="tel" id="editPhone" name="phone" required>
+                    </div>
+                    <div class="modern-input-group">
+                        <label for="editAddress">Address</label>
+                        <input type="text" id="editAddress" name="address">
+                    </div>
+                    <div class="modern-input-group">
+                        <label>Category</label>
+                        <div class="segmented-control">
+                            <input type="radio" name="category" value="work" id="editCategoryWork">
+                            <label for="editCategoryWork"><i class="fas fa-briefcase"></i> Work</label>
+                            <input type="radio" name="category" value="personal" id="editCategoryPersonal">
+                            <label for="editCategoryPersonal"><i class="fas fa-user"></i> Personal</label>
+                        </div>
+                    </div>
+                    <div class="modern-input-group">
+                        <label for="editNotes">Notes</label>
+                        <div class="textarea-container">
+                            <textarea id="editNotes" name="notes" class="expandable-textarea" rows="3"></textarea>
+                            <div class="character-counter">0 / 500</div>
+                        </div>
+                    </div>
+                    <div class="modern-input-group">
+                        <label><input type="checkbox" id="editFavorite" name="is_favorite"> Favorite</label>
+                    </div>
+                    <div class="modern-input-group">
+                        <label for="editProfileImage">Profile Image</label>
+                        <div class="image-upload-area" id="imageDropArea">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p>Drag & Drop image here or click to select</p>
+                            <input type="file" id="editProfileImage" name="profile_image" accept="image/*">
+                            <div class="image-preview-container">
+                                <img class="image-preview" id="imagePreview" alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-actions">
+                        <button type="button" class="btn btn-danger" onclick="closeEditPanel()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        
+        const API_BASE = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+
+        /* simpler URL param helper that supports `id` or `_id` */
+        function getUrlParameter(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+        function getContactId() {
+            // support both id and _id in query string
+            return getUrlParameter('id') || getUrlParameter('_id');
+        }
+
+        let currentContact = null;
+
+        async function loadContactDetails() {
+            const contactId = getContactId();
+            if (!contactId) {
+                // don't redirect immediately — show a friendly message
+                document.querySelector('.contact-name').textContent = 'No contact ID provided';
+                console.warn('No contact id in URL');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/contacts/${encodeURIComponent(contactId)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    currentContact = await response.json();
+                    console.log('Loaded contact:', currentContact);
+
+                    // src & profile
+                    if (currentContact.profile_image) {
+                        if (currentContact.profile_image.startsWith('profile_image-')) {
+                            document.querySelector('.avatar').src = `/uploads/${currentContact.profile_image}`;
+                        } else {
+                            document.querySelector('.avatar').src = `./src/images/${currentContact.profile_image}`;
+                        }
+                    } else {
+                        document.querySelector('.avatar').src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zMCA0NUMzMCAzOC41IDI2LjUgMzMgMzAgMzNDMzMgMjYuNSAzOC41IDIxIDQ1IDIxQzUxLjUgMjEgNTcgMjYuNSA1NyAzM0M1NyAzOC41IDUxLjUgNDUgNDUgNDVDNTEuNSA1MS41IDU3IDU3IDU3IDYzVjY5QzU3IDc1LjUgNTEuNSA4MSA0NSA4MUMzOC41IDgxIDMzIDc1LjUgMzMgNjlWMzNaIiBmaWxsPSIjOUI5QkE0Ii8+Cjwvc3ZnPgo=';
+                    }
+                    document.querySelector('.avatar').alt = `Headshot of ${currentContact.name || ''}`;
+                    document.querySelector('.contact-name').textContent = currentContact.name || '';
+                    const cat = currentContact.category || 'personal';
+                    const typeEl = document.querySelector('.contact-type');
+                    typeEl.className = `contact-type type-${cat}`;
+                    typeEl.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+
+                    // favorite
+                    const favBadge = document.querySelector('.favorite-badge');
+                    if (favBadge) {
+                        if (currentContact.is_favorite) favBadge.style.display = 'inline-flex';
+                        else favBadge.style.display = 'none';
+                    }
+
+                    // email
+                    const emailLink = document.querySelector('.detail-card:nth-of-type(1) .contact-info a');
+                    if (emailLink) {
+                        if (currentContact.email) {
+                            emailLink.href = `mailto:${currentContact.email}`;
+                            emailLink.textContent = currentContact.email;
+                            emailLink.style.display = 'inline';
+                        } else {
+                            emailLink.style.display = 'none';
+                        }
+                    }
+
+                    // phone
+                    const phoneLink = document.querySelector('.detail-card:nth-of-type(2) .contact-info a');
+                    if (phoneLink) {
+                        if (currentContact.phone) {
+                            phoneLink.href = `tel:${currentContact.phone.replace(/\s/g, '')}`;
+                            phoneLink.textContent = currentContact.phone;
+                            phoneLink.style.display = 'inline';
+                        } else {
+                            phoneLink.style.display = 'none';
+                        }
+                    }
+
+                    // address
+                    const addressInfo = document.querySelector('.detail-card:nth-of-type(3) .contact-info');
+                    if (addressInfo) {
+                        if (currentContact.address) {
+                            addressInfo.innerHTML = `<i class="fas fa-building" style="color: var(--accent);"></i> ${currentContact.address}`;
+                            addressInfo.style.display = 'flex';
+                        } else {
+                            addressInfo.style.display = 'none';
+                        }
+                    }
+
+                    // notes
+                    const additionalInfo = document.querySelector('.additional-info p');
+                    if (additionalInfo) {
+                        additionalInfo.textContent = currentContact.notes || '';
+                    }
+
+                    const tagsEl = document.querySelector('.tags');
+                    if (tagsEl) {
+                        tagsEl.style.display = 'none';
+                    }
+
+                } else if (response.status === 401) {
+                    alert('Your session has expired. Please log in again.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                } else {
+                    console.warn('Contact fetch failed, status:', response.status);
+                    document.querySelector('.contact-name').textContent = 'Contact not found';
+                    const additionalInfo = document.querySelector('.additional-info p');
+                    if (additionalInfo) {
+                        additionalInfo.textContent = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading contact details:', error);
+                document.querySelector('.contact-name').textContent = 'Error loading contact';
+                document.querySelector('.additional-info p').textContent = 'Unable to load contact details. Check your connection.';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadContactDetails();
+            const detailCards = document.querySelectorAll('.detail-card');
+            detailCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        /* Edit panel interactions rely on currentContact — be tolerant about id/_id */
+        function editContact() {
+            if (!currentContact) return;
+            document.getElementById('editName').value = currentContact.name || '';
+            document.getElementById('editEmail').value = currentContact.email || '';
+            document.getElementById('editPhone').value = currentContact.phone || '';
+            document.getElementById('editAddress').value = currentContact.address || '';
+            document.getElementById('editNotes').value = currentContact.notes || '';
+
+            // Character counter for notes
+            const notesTextarea = document.getElementById('editNotes');
+            const characterCounter = document.querySelector('.character-counter');
+            // Remove previous event listener if any to avoid multiple bindings
+            notesTextarea.removeEventListener('input', updateCounter);
+            function updateCounter() {
+                const length = this.value.length;
+                characterCounter.textContent = `${length} / 500`;
+                if (length > 500) {
+                    characterCounter.style.color = 'red';
+                } else {
+                    characterCounter.style.color = '#94a3b8';
+                }
+            }
+            notesTextarea.addEventListener('input', updateCounter);
+            // Initial update
+            const initialLength = notesTextarea.value.length;
+            characterCounter.textContent = `${initialLength} / 500`;
+
+            // Set category
+            const category = currentContact.category || 'personal';
+            if (category === 'personal') {
+                document.getElementById('editCategoryPersonal').checked = true;
+            } else {
+                document.getElementById('editCategoryWork').checked = true;
+            }
+
+            // Set favorite
+            document.getElementById('editFavorite').checked = currentContact.is_favorite ? true : false;
+
+            // Simple image preview and drag-drop using existing HTML elements
+            const profileImageInput = document.getElementById('editProfileImage');
+            const imagePreview = document.getElementById('imagePreview');
+            const imageDropArea = document.getElementById('imageDropArea');
+
+            // Set initial preview if existing image
+            if (currentContact.profile_image) {
+                if (currentContact.profile_image.startsWith('profile_image-')) {
+                    imagePreview.src = `/uploads/${currentContact.profile_image}`;
+                } else {
+                    imagePreview.src = `./src/images/${currentContact.profile_image}`;
+                }
+                imagePreview.style.display = 'block';
+            } else {
+                imagePreview.style.display = 'none';
+            }
+
+            // Handle file selection
+            profileImageInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    displayImagePreview(file);
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                imageDropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                imageDropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                imageDropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                imageDropArea.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                imageDropArea.classList.remove('dragover');
+            }
+
+            imageDropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        // Create a new DataTransfer to set files
+                        const dtNew = new DataTransfer();
+                        dtNew.items.add(file);
+                        profileImageInput.files = dtNew.files;
+                        displayImagePreview(file);
+                    }
+                }
+            }
+
+            function displayImagePreview(file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            document.getElementById('editPanel').classList.add('active');
+        }
+        function closeEditPanel() {
+            document.getElementById('editPanel').classList.remove('active');
+        }
+
+        /* Submit edit */
+        document.getElementById('editForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (!currentContact) return;
+            const idForApi = currentContact.id || currentContact._id;
+            const formData = new FormData();
+            formData.append('name', document.getElementById('editName').value);
+            formData.append('email', document.getElementById('editEmail').value);
+            formData.append('phone', document.getElementById('editPhone').value);
+            formData.append('address', document.getElementById('editAddress').value);
+            formData.append('category', document.querySelector('input[name="category"]:checked').value);
+            formData.append('notes', document.getElementById('editNotes').value);
+            const isFavorite = document.getElementById('editFavorite').checked ? 1 : 0;
+            formData.append('is_favorite', isFavorite);
+            const fileInput = document.getElementById('editProfileImage');
+            if (fileInput.files[0]) {
+                formData.append('profile_image', fileInput.files[0]);
+            }
+            try {
+                const res = await fetch(`${API_BASE}/contacts/${encodeURIComponent(idForApi)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                if (res.ok) {
+                    currentContact = await res.json();
+                    loadContactDetails(); // refresh DOM
+                    alert('Contact updated successfully!');
+                    closeEditPanel();
+                } else if (res.status === 401) {
+                    alert('Session expired. Please log in again.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                } else {
+                    alert('Failed to update contact (status ' + res.status + ')');
+                }
+            } catch (err) {
+                console.error('Error updating contact:', err);
+                alert('Error updating contact');
+            }
+        });
+
+        /* Delete from detail page */
+        async function deleteContact() {
+            if (!currentContact) { alert('Contact not loaded'); return; }
+            if (!confirm(`Are you sure you want to delete "${currentContact.name}"?`)) return;
+            try {
+                const idForApi = currentContact.id || currentContact._id;
+                const res = await fetch(`${API_BASE}/contacts/${encodeURIComponent(idForApi)}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    alert('Contact deleted');
+                    window.location.href = 'contacts.html';
+                } else {
+                    alert('Failed to delete contact (status ' + res.status + ')');
+                }
+            } catch (err) {
+                console.error('Error deleting contact:', err);
+                alert('Error deleting contact');
+            }
+        }
+
+        /* shareContact function (unchanged from your version) */
+        function shareContact() {
+            if (!currentContact) return;
+            const shareData = {
+                title: "Contact Info",
+                text: `${currentContact.name}\nEmail: ${currentContact.email || 'N/A'}\nPhone: ${currentContact.phone || 'N/A'}`,
+                url: window.location.href
+            };
+            if (navigator.share) {
+                navigator.share(shareData).catch(() => alert("Sharing canceled or not supported."));
+            } else {
+                navigator.clipboard.writeText(shareData.text).then(() => alert("Contact info copied to clipboard!"));
+            }
+        }
+    </script>
+
+    <script>
+        function goBack() {
+            window.location.href = 'contacts.html';
+        }
+
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+
+        if (hamburger) {
+            hamburger.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+                hamburger.classList.toggle('active');
+            });
+        }
+        // Logout link
+        const logoutLink = document.querySelector('a[href="#logout"]');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+        }
+    </script>
+</body>
+
+</html>
+

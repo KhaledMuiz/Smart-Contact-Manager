@@ -10,7 +10,11 @@ router.use(authenticateToken);
 // Get all contacts for user
 router.get('/', (req, res) => {
   try {
-    const contacts = Contact.findByUserId(req.user.id);
+    const userId = parseInt(req.user.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const contacts = Contact.findByUserId(userId);
     res.json(contacts);
   } catch (error) {
     console.error('Get contacts error:', error);
@@ -22,17 +26,18 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid contact ID' });
+    const userId = parseInt(req.user.id, 10);
+    if (isNaN(id) || isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
     }
-    console.log(`User ${req.user.id} requesting contact ${id}`);
+    console.log(`User ${userId} requesting contact ${id}`);
     const contact = Contact.findById(id);
     if (!contact) {
       console.log(`Contact ${id} not found`);
       return res.status(404).json({ error: 'Contact not found' });
     }
-    if (contact.user_id != req.user.id) {
-      console.log(`Contact ${id} access denied for user ${req.user.id}`);
+    if (contact.user_id != userId) {
+      console.log(`Contact ${id} access denied for user ${userId}`);
       return res.status(403).json({ error: 'Access denied' });
     }
     res.json(contact);
@@ -45,6 +50,10 @@ router.get('/:id', (req, res) => {
 // Create new contact
 router.post('/', (req, res) => {
   try {
+    const userId = parseInt(req.user.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
     const { name, email, phone, address, category, is_favorite, notes } = req.body;
     let profile_image = null;
 
@@ -62,7 +71,7 @@ router.post('/', (req, res) => {
     }
 
     const contactId = Contact.create({
-      user_id: req.user.id,
+      user_id: userId,
       name,
       email,
       phone,
@@ -85,15 +94,19 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = parseInt(req.user.id, 10);
     const updates = req.body;
 
+    if (isNaN(id) || isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
     if (!updates.name) {
       return res.status(400).json({ error: 'Name is required' });
     }
 
     // Check if contact belongs to user
     const contact = Contact.findById(id);
-    if (!contact || contact.user_id != req.user.id) {
+    if (!contact || contact.user_id != userId) {
       return res.status(404).json({ error: 'Contact not found' });
     }
 
@@ -120,14 +133,49 @@ router.put('/:id', (req, res) => {
   }
 });
 
+// Toggle favorite
+router.patch('/:id/favorite', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const userId = parseInt(req.user.id, 10);
+
+    if (isNaN(id) || isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    // Check if contact belongs to user
+    const contact = Contact.findById(id);
+    if (!contact || contact.user_id != userId) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    const newFavorite = contact.is_favorite ? 0 : 1;
+    const updated = Contact.update(id, { is_favorite: Number(newFavorite) }); // ensure integer
+    if (!updated) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    const updatedContact = Contact.findById(id);
+    res.json(updatedContact);
+  } catch (error) {
+    console.error('Toggle favorite error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Delete contact
 router.delete('/:id', (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = parseInt(req.user.id, 10);
+
+    if (isNaN(id) || isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
 
     // Check if contact belongs to user
     const contact = Contact.findById(id);
-    if (!contact || contact.user_id != req.user.id) {
+    if (!contact || contact.user_id != userId) {
       return res.status(404).json({ error: 'Contact not found' });
     }
 

@@ -23,13 +23,13 @@ db.exec(`
 try {
   db.exec(`ALTER TABLE contacts ADD COLUMN notes TEXT`);
 } catch (error) {
-  // Column might already exist, ignore error
+  
 }
 
 try {
   db.exec(`ALTER TABLE contacts ADD COLUMN profile_image TEXT`);
 } catch (error) {
-  // Column might already exist, ignore error
+ 
 }
 
 class Contact {
@@ -51,8 +51,13 @@ class Contact {
   }
 
   static findByUserId(user_id) {
+    const parsedUserId = parseInt(user_id, 10);
+    if (isNaN(parsedUserId)) {
+      console.error('Invalid user_id in findByUserId:', user_id);
+      return [];
+    }
     const stmt = db.prepare('SELECT * FROM contacts WHERE user_id = ? ORDER BY created_at DESC');
-    return stmt.all(user_id);
+    return stmt.all(parsedUserId);
   }
 
   static findById(id) {
@@ -85,8 +90,8 @@ class Contact {
       values.push(contactData.category || 'personal');
     }
     if (contactData.is_favorite !== undefined) {
-      fields.push('is_favorite = ?');
-      values.push(contactData.is_favorite || 0);
+  fields.push('is_favorite = ?');
+  values.push(Number(contactData.is_favorite)); // force integer
     }
     if (contactData.notes !== undefined) {
       fields.push('notes = ?');
@@ -121,16 +126,23 @@ class Contact {
   }
 
   static getStats(user_id) {
+    console.log('getStats called with user_id:', user_id, 'type:', typeof user_id);
+    const userId = parseInt(user_id, 10);
+    if (isNaN(userId)) {
+      console.error('Invalid user_id in getStats:', user_id);
+      throw new Error('Invalid user ID');
+    }
     const totalStmt = db.prepare('SELECT COUNT(*) as total FROM contacts WHERE user_id = ?');
-    const favoritesStmt = db.prepare('SELECT COUNT(*) as favorites FROM contacts WHERE user_id = ? AND is_favorite = 1');
-    const workStmt = db.prepare('SELECT COUNT(*) as work FROM contacts WHERE user_id = ? AND category = "work"');
-    const personalStmt = db.prepare('SELECT COUNT(*) as personal FROM contacts WHERE user_id = ? AND category = "personal"');
+    const favoritesStmt = db.prepare('SELECT COUNT(*) as favorites FROM contacts WHERE user_id = ? AND (is_favorite = 1 OR is_favorite = \'1\' OR is_favorite = \'true\')');
+    const workStmt = db.prepare('SELECT COUNT(*) as work FROM contacts WHERE user_id = ? AND category = \'work\'');
+    const personalStmt = db.prepare('SELECT COUNT(*) as personal FROM contacts WHERE user_id = ? AND category = \'personal\'');
 
-    const total = totalStmt.get(user_id).total;
-    const favorites = favoritesStmt.get(user_id).favorites;
-    const work = workStmt.get(user_id).work;
-    const personal = personalStmt.get(user_id).personal;
+    const total = totalStmt.get(userId).total;
+    const favorites = favoritesStmt.get(userId).favorites;
+    const work = workStmt.get(userId).work;
+    const personal = personalStmt.get(userId).personal;
 
+    console.log('getStats query results:', { total, favorites, work, personal });
     return { total, favorites, work, personal };
   }
 }

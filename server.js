@@ -11,9 +11,12 @@ require('dotenv').config();
 // Import database to initialize tables
 const db = require('./backend/config/database');
 
+// Import routes
 const authRoutes = require('./backend/routes/auth');
 const contactRoutes = require('./backend/routes/contacts');
 const dashboardRoutes = require('./backend/routes/dashboard');
+// Import admin routes
+const adminRoutes = require('./backend/routes/admin');
 const contactFormRoutes = require('./backend/routes/contact-form');
 
 // Multer setup for file uploads
@@ -35,8 +38,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from the current directory
-app.use(express.static(path.join(__dirname)));
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -51,36 +54,45 @@ app.use('/api/contacts', (req, res, next) => {
   }
 }, contactRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api', contactFormRoutes);
-
+app.use('/api/admin', adminRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
 
+app.use('/api', contactFormRoutes);
+
 // Serve the main pages
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dashboard.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/contacts', (req, res) => {
-    res.sendFile(path.join(__dirname, 'contacts.html'));
+    res.sendFile(path.join(__dirname, 'public', 'contacts.html'));
 });
 
 app.get('/add-contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'add-contact.html'));
+    res.sendFile(path.join(__dirname, 'public', 'add-contact.html'));
 });
 
 app.get('/contact-detail', (req, res) => {
-    res.sendFile(path.join(__dirname, 'contact-detail.html'));
+    res.sendFile(path.join(__dirname, 'public', 'contact-detail.html'));
 });
 
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'login.html'));
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, 'signup.html'));
+    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Error handling middleware

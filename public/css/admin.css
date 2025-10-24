@@ -1,0 +1,56 @@
+ .sidebar {
+     min-height: 100vh;
+     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+     color: white;
+ }
+
+ .sidebar .nav-link {
+     color: rgba(255, 255, 255, 0.8);
+     transition: all 0.3s;
+ }
+
+ .sidebar .nav-link:hover {
+     color: white;
+     background: rgba(255, 255, 255, 0.1);
+ }
+
+ .sidebar .nav-link.active {
+     background: rgba(255, 255, 255, 0.2);
+     color: white;
+ }
+
+ .main-content {
+     background: #f8f9fa;
+ }
+
+ .card {
+     border: none;
+     border-radius: 15px;
+     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+     transition: transform 0.3s;
+ }
+
+ .card:hover {
+     transform: translateY(-5px);
+ }
+
+ .stat-icon {
+     font-size: 2rem;
+     color: #667eea;
+ }
+
+ .table {
+     border-radius: 10px;
+     overflow: hidden;
+ }
+
+ .btn-danger {
+     background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+     border: none;
+ }
+
+ .btn-primary {
+     background: linear-gradient(135deg, #667eea, #764ba2);
+     border: none;
+ }
+

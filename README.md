@@ -2,8 +2,8 @@
 
 A full-stack web application for managing personal and professional contacts efficiently. Built with Node.js, Express, SQLite, and vanilla JavaScript.
 
-![Landing Page Sample](src/images/landingpage-sample.png)
-![Dashboard Page Sample](src/images/dashboard-sample.png)
+![Landing Page Sample](public/assets/images/landingpage-sample.png)
+![Dashboard Page Sample](public/assets/images/dashboard-sample.png)
 
 ## Features
 
@@ -41,7 +41,7 @@ A full-stack web application for managing personal and professional contacts eff
 ## Project Structure
 
 ```
-contact-manager/
+smart-contact-manager/
 ├── backend/                    # Backend application
 │   ├── config/
 │   │   └── database.js         # Database initialization
@@ -57,25 +57,28 @@ contact-manager/
 │   │   ├── contact-form.js     # Contact form routes
 │   │   ├── contacts.js         # Contact CRUD routes
 │   │   └── dashboard.js        # Dashboard stats routes
-│   ├── server.js               # Backend server entry point
 │   ├── package.json            # Backend dependencies
 │   └── contacts.db             # SQLite database file
+├── public/                     # Frontend static files
+│   ├── assets/
+│   │   └── images/             # Static images
+│   ├── css/
+│   │   └── style.css           # Global styles
+│   ├── js/
+│   │   └── client.js           # Client-side scripts (animations, etc.)
+│   ├── admin.html              # Admin dashboard page
+│   ├── add-contact.html        # Add new contact page
+│   ├── contact-detail.html     # Contact details page
+│   ├── contacts.html           # Contacts list page
+│   ├── dashboard.html          # Dashboard page
+│   ├── index.html              # Home page
+│   ├── login.html              # Login page
+│   ├── navbar.html             # Navigation component
+│   ├── signup.html             # Signup page
 ├── uploads/                    # Uploaded profile images
-├── src/
-│   └── images/                 # Static images
-├── admin.html                  # Admin dashboard page
-├── add-contact.html            # Add new contact page
-├── contact-detail.html         # Contact details page
-├── contacts.html               # Contacts list page
-├── dashboard.html              # Dashboard page
-├── index.html                  # Home page
-├── login.html                  # Login page
-├── navbar.html                 # Navigation component
-├── signup.html                 # Signup page
-├── style.css                   # Global styles
-├── server.js                   # Frontend server entry point
-├── frontend-server.js          # Animation script
-├── package.json                # Frontend dependencies
+├── server.js                   # Main server entry point
+├── package.json                # Project dependencies
+├── TODO.md                     # Project tasks
 └── README.md                   # This file
 ```
 
@@ -86,43 +89,15 @@ contact-manager/
 - Node.js (v14 or higher)
 - npm or yarn
 
-### Backend Setup
+### Setup
 
-1. Navigate to the backend directory:
-
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. Start the backend server:
-
-   ```bash
-   npm start
-   ```
-
-   The backend server will run on `http://localhost:3000`
-
-### Frontend Setup
-
-1. Return to the root directory:
-
-   ```bash
-   cd ..
-   ```
-
-2. Install frontend dependencies (if any):
-
-   ```bash
-   npm install
-   ```
-
-3. Start the frontend server:
+2. Start the server:
 
    ```bash
    node server.js
@@ -132,10 +107,9 @@ contact-manager/
 
 ## Running the Application
 
-1. Ensure both backend and frontend servers are running
-2. Open your browser and navigate to `http://localhost:3000`
-3. Sign up for a new account or log in with existing credentials
-4. Start managing your contacts!
+1. Open your browser and navigate to `http://localhost:3000`
+2. Sign up for a new account or log in with existing credentials
+3. Start managing your contacts!
 
 ## API Endpoints
 

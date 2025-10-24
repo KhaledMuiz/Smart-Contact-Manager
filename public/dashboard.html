@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard | Smart Contact Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <button class="back-btn" onclick="window.history.back()">&larr;</button>
+        <div class="logo">Smart Contact Manager</div>
+        <nav class="navbar">
+            <div class="hamburger">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="contacts.html">Contacts</a></li>
+                <li><a href="add-contact.html">Add Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <!-- DASHBOARD -->
+    <main class="dashboard">
+        <section class="welcome animate-on-scroll">
+            <h1>Welcome back, Khaled 👋</h1>
+            <p>Manage your contacts efficiently.</p>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats-grid stagger animate-on-scroll">
+            <div class="stat-card">
+                <i class="fas fa-address-book"></i>
+                <h2 id="totalCount">0</h2>
+                <p>Total</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-briefcase"></i>
+                <h2 id="workCount">0</h2>
+                <p>Work</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-user"></i>
+                <h2 id="personalCount">0</h2>
+                <p>Personal</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-star"></i>
+                <h2 id="favoritesCount">0</h2>
+                <p>Favorites</p>
+            </div>
+        </section>
+
+        <!-- Search + Filters -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search contacts..." />
+            <select id="filterSelect">
+                <option value="all">All</option>
+                <option value="work">Work</option>
+                <option value="personal">Personal</option>
+                <option value="favorites">Favorites</option>
+            </select>
+        </div>
+
+        <!-- Contacts List -->
+        <section class="contacts-list" id="contactsList">
+            <!-- Contacts will be loaded here -->
+        </section>
+        <div id="noContactsMsg" style="display:none;text-align:center;color:#888;margin:2rem 0;">
+            <i class="fas fa-user-slash" style="font-size:2rem;"></i><br>
+            No contacts found.
+        </div>
+
+        <!-- Recent Activity -->
+        <section class="activity-log animate-on-scroll">
+            <h2>Recent Activity</h2>
+            <div class="activity-item">Added new contact: Ahmed Mohamed</div>
+            <div class="activity-item">Edited contact: Khaled Mohamed</div>
+            <div class="activity-item">Exported contacts (CSV)</div>
+        </section>
+
+        <!-- Chart -->
+        <section class="chart-section animate-on-scroll">
+            <h2>Contacts by Category</h2>
+            <div class="chart-wrapper" style="position:relative;">
+                <canvas id="contactsChart"></canvas>
+                <div id="noChartDataMsg"
+                    style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;text-align:center;">
+                    <i class="fas fa-chart-pie" style="font-size:2rem;"></i><br>
+                    No data to display
+                </div>
+            </div>
+        </section>
+
+        <!-- Smart Suggestions -->
+        <section class="suggestions animate-on-scroll">
+            <h2>Smart Suggestions</h2>
+            <ul>
+                <li>Merge duplicates: 2 found</li>
+                <li>Add missing emails: 3 contacts incomplete</li>
+                <li>Backup contacts this week</li>
+            </ul>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="actions animate-on-scroll">
+            <button class="btn" onclick="addContactPage()"><i class="fas fa-user-plus"></i> Add</button>
+            <button class="btn" onclick="importContacts()"><i class="fas fa-file-import"></i> Import</button>
+            <button class="btn" onclick="exportContacts()"><i class="fas fa-file-export"></i> Export</button>
+            <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="handleFile(event)" />
+        </section>
+    </main>
+
+    <!-- Side Edit Panel -->
+    <div id="editPanel" class="edit-panel">
+        <h2>Edit Contact</h2>
+        <form id="editForm">
+            <div class="input-group">
+                <label for="editName">Full Name</label>
+                <input type="text" id="editName" required>
+            </div>
+            <div class="input-group">
+                <label for="editEmail">Email</label>
+                <input type="email" id="editEmail" required>
+            </div>
+            <div class="input-group">
+                <label for="editPhone">Phone</label>
+                <input type="tel" id="editPhone" required>
+            </div>
+            <div class="panel-actions">
+                <button type="button" class="btn danger" onclick="closeEditPanel()">Cancel</button>
+                <button type="submit" class="btn">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal"
+        style="display:none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 3000;">
+        <div
+            style="background: white; padding: 2rem; border-radius: 8px; max-width: 400px; width: 90%; text-align: center;">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this contact?</p>
+            <button id="confirmDelete" class="btn" style="margin-right: 1rem;">Yes, Delete</button>
+            <button id="cancelDelete" class="btn">Cancel</button>
+        </div>
+    </div>
+    <script>
+        const hamburger = document.querySelector(".hamburger");
+        const navMenu = document.querySelector(".nav-menu");
+
+        // Function to update navbar based on login status
+        function updateNavbar() {
+            const token = localStorage.getItem("token");
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            const navMenuItems = navMenu.querySelectorAll("li");
+            navMenuItems.forEach((item) => {
+                const link = item.querySelector("a");
+                if (!link) return;
+                const href = link.getAttribute("href");
+                if (token) {
+                    // User logged in: hide login and signup, show logout
+                    if (href === "login.html" || href === "signup.html") {
+                        item.style.display = "none";
+                    } else if (href === "#logout") {
+                        item.style.display = "block";
+                    } else {
+                        item.style.display = "block";
+                    }
+                } else {
+                    // User not logged in: show login and signup, hide logout
+                    if (href === "login.html" || href === "signup.html") {
+                        item.style.display = "block";
+                    } else if (href === "#logout") {
+                        item.style.display = "none";
+                    } else {
+                        item.style.display = "block";
+                    }
+                }
+            });
+
+            // Add admin link if user is admin
+            if (token && user.role === 'admin') {
+                if (!document.querySelector('a[href="admin.html"]')) {
+                    const adminLi = document.createElement('li');
+                    const adminLink = document.createElement('a');
+                    adminLink.href = 'admin.html';
+                    adminLink.textContent = 'Admin';
+                    // Insert before logout
+                    const logoutLi = document.querySelector('a[href="#logout"]').parentElement;
+                    navMenu.insertBefore(adminLi, logoutLi);
+                }
+            }
+        }
+
+        // Add logout menu item dynamically
+        function addLogoutMenuItem() {
+            const logoutLi = document.createElement("li");
+            const logoutLink = document.createElement("a");
+            logoutLink.href = "#logout";
+            logoutLink.textContent = "Logout";
+            logoutLink.style.cursor = "pointer";
+            logoutLink.addEventListener("click", () => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "login.html";
+            });
+            logoutLi.appendChild(logoutLink);
+            navMenu.appendChild(logoutLi);
+        }
+
+        addLogoutMenuItem();
+        updateNavbar();
+
+        hamburger.addEventListener("click", () => {
+            navMenu.classList.toggle("active");
+            hamburger.classList.toggle("active");
+        });
+
+        // Get token and user
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        // Update welcome message
+        document.querySelector(".welcome h1").textContent = `Welcome back, ${user.name || "User"
+            } 👋`;
+
+        let allContacts = [];
+        let contactsChart = null;
+
+        // Fetch dashboard stats
+        async function fetchStats() {
+            try {
+                const response = await fetch("http://localhost:3000/api/dashboard", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!response.ok) throw new Error("Failed to fetch stats");
+                const stats = await response.json();
+
+                // Defensive: fallback to 0 if missing
+                const total = Number(stats.total) || 0;
+                const work = Number(stats.work) || 0;
+                const personal = Number(stats.personal) || 0;
+                const favorites = Number(stats.favorites) || 0;
+
+                document.getElementById("totalCount").textContent = total;
+                document.getElementById("workCount").textContent = work;
+                document.getElementById("personalCount").textContent = personal;
+                document.getElementById("favoritesCount").textContent = favorites;
+
+                // Chart logic
+                const chartData = [total, work, personal, favorites];
+                const noChartData = chartData.every(v => v === 0);
+                document.getElementById("noChartDataMsg").style.display = noChartData ? "block" : "none";
+
+                const canvas = document.getElementById("contactsChart");
+                if (!canvas || typeof Chart === "undefined") return;
+
+                if (contactsChart) contactsChart.destroy();
+                if (!noChartData) {
+                    contactsChart = new Chart(canvas, {
+                        type: "bar",
+                        data: {
+                            labels: ["Total", "Work", "Personal", "Favorites"],
+                            datasets: [{
+                                data: chartData,
+                                backgroundColor: ["#8B5CF6", "#3b82f6", "#facc15", "#ef4444"],
+                            }],
+                        },
+                        options: { plugins: { legend: { position: "bottom" } } },
+                    });
+                } else {
+                    // Clear chart if no data
+                    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+                    contactsChart = null;
+                }
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+                // Optionally show a user-visible error
+            }
+        }
+
+        // Fetch contacts
+        async function fetchContacts() {
+            try {
+                const response = await fetch("http://localhost:3000/api/contacts", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!response.ok) throw new Error("Failed to fetch contacts");
+                allContacts = await response.json();
+                renderContacts(allContacts);
+            } catch (error) {
+                console.error("Error fetching contacts:", error);
+                renderContacts([]); // Show empty state
+            }
+        }
+
+        // In renderContacts, update the favorite star to be a button and make it interactive
+            function renderContacts(contacts) {
+                const list = document.getElementById("contactsList");
+                const noMsg = document.getElementById("noContactsMsg");
+                list.innerHTML = "";
+                if (!contacts || contacts.length === 0) {
+                    noMsg.style.display = "block";
+                    return;
+                }
+                noMsg.style.display = "none";
+                contacts.forEach((contact) => {
+                    const row = document.createElement("div");
+                    row.classList.add("contact-row");
+                    row.innerHTML = `
+      <div>${contact.name}</div>
+      <div>${contact.email}</div>
+      <div>${contact.phone}</div>
+      <div>${contact.category || ""}</div>
+      <div>
+        <button class="favorite-btn" data-id="${contact.id}" title="Toggle Favorite" style="background:none;border:none;cursor:pointer;">
+          <i class="fas fa-star" style="color:${contact.is_favorite ? 'gold' : '#ccc'}"></i>
+        </button>
+      </div>
+      <div class="contact-actions">
+        <button class="edit-btn" data-id="${contact.id}" title="Edit Contact">
+          <i class="fas fa-edit"></i> Edit
+        </button>
+        <button class="delete-btn" data-id="${contact.id}" title="Delete Contact">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    `;
+                    list.appendChild(row);
+                });
+            }
+
+            // Toggle favorite
+                document.addEventListener("click", (e) => {
+                    if (e.target.classList.contains("favorite-btn") || e.target.closest(".favorite-btn")) {
+                        const button = e.target.classList.contains("favorite-btn") ? e.target : e.target.closest(".favorite-btn");
+                        const contactId = button.getAttribute("data-id");
+                        toggleFavorite(contactId, button);
+                    }
+                });
+
+                async function toggleFavorite(id, button) {
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/contacts/${id}/favorite`, {
+                            method: "PATCH",
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                        if (response.ok) {
+                            // Always refresh stats and contacts after toggling favorite
+                            await fetchStats();
+                            await fetchContacts();
+                        } else {
+                            alert("Error toggling favorite");
+                        }
+                    } catch (error) {
+                        console.error("Error toggling favorite:", error);
+                        alert("Error toggling favorite");
+                    }
+                }
+
+        // Filtering/search logic 
+        document.getElementById("searchInput").addEventListener("input", filterContacts);
+        document.getElementById("filterSelect").addEventListener("change", filterContacts);
+
+        function filterContacts() {
+            const query = document.getElementById("searchInput").value.toLowerCase();
+            const filter = document.getElementById("filterSelect").value;
+            let filtered = allContacts.filter((contact) => {
+                const matchesQuery =
+                    contact.name.toLowerCase().includes(query) ||
+                    contact.email.toLowerCase().includes(query) ||
+                    contact.phone.toLowerCase().includes(query);
+                const matchesFilter =
+                    filter === "all" ||
+                    (filter === "favorites" && contact.is_favorite) ||
+                    (filter === "work" && contact.category === "work") ||
+                    (filter === "personal" && contact.category === "personal");
+                return matchesQuery && matchesFilter;
+            });
+            renderContacts(filtered);
+        }
+
+        // Load data on page load
+        fetchStats();
+        fetchContacts();
+
+
+        // === Slide-in Edit Panel Logic ===
+        const editPanel = document.getElementById("editPanel");
+        const editForm = document.getElementById("editForm");
+        let currentContactId = null;
+
+        // Open Panel
+        function openEditPanel(contactRow, contactId) {
+            currentContactId = contactId;
+            const name = contactRow.children[0].textContent;
+            const email = contactRow.children[1].textContent;
+            const phone = contactRow.children[2].textContent;
+
+            document.getElementById("editName").value = name;
+            document.getElementById("editEmail").value = email;
+            document.getElementById("editPhone").value = phone;
+
+            editPanel.classList.add("active");
+        }
+
+        // Close Panel
+        function closeEditPanel() {
+            editPanel.classList.remove("active");
+            currentContactId = null;
+            editForm.reset();
+        }
+
+        // Save Changes
+        editForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            if (currentContactId) {
+                const updatedData = {
+                    name: document.getElementById("editName").value,
+                    email: document.getElementById("editEmail").value,
+                    phone: document.getElementById("editPhone").value
+                };
+                try {
+                    const response = await fetch(`http://localhost:3000/api/contacts/${currentContactId}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+                    if (response.ok) {
+                        const updatedContact = await response.json();
+                        // Update the row
+                        const contactRow = document.querySelector(`.edit-btn[data-id="${currentContactId}"]`).closest(".contact-row");
+                        contactRow.children[0].textContent = updatedContact.name;
+                        contactRow.children[1].textContent = updatedContact.email;
+                        contactRow.children[2].textContent = updatedContact.phone;
+                        closeEditPanel();
+                    } else {
+                        alert("Error updating contact");
+                    }
+                } catch (error) {
+                    console.error("Error updating contact:", error);
+                    alert("Error updating contact");
+                }
+            }
+        });
+
+        // Attach to Edit Buttons
+        document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("edit-btn") || e.target.closest(".edit-btn")) {
+                const button = e.target.classList.contains("edit-btn") ? e.target : e.target.closest(".edit-btn");
+                const contactId = button.getAttribute("data-id");
+                const contactRow = button.closest(".contact-row");
+                openEditPanel(contactRow, contactId);
+            }
+        });
+
+
+
+
+        // IMPORT CONTACTS
+        function importContacts() {
+            document.getElementById("fileInput").click();
+        }
+
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const text = event.target.result;
+                const rows = text.split("\n").map((r) => r.trim()).filter((r) => r);
+                rows.shift(); // remove header row "Name,Email,Phone"
+
+                rows.forEach((row) => {
+                    const [name, email, phone] = row.split(",");
+                    addContactRow(name, email, phone);
+                });
+                alert("Contacts imported successfully ✅");
+            };
+            reader.readAsText(file);
+        }
+
+        // ADD CONTACT ROW
+        function addContactPage() {
+            window.location.href = "add-contact.html";
+        }
+        function addContactRow(name, email, phone, id = null) {
+            const list = document.getElementById("contactsList");
+
+            const row = document.createElement("div");
+            row.classList.add("contact-row");
+            row.innerHTML = `
+        <div>${name}</div>
+        <div>${email}</div>
+        <div>${phone}</div>
+        <div class="contact-actions">
+            <button class="edit-btn" ${id ? `data-id="${id}"` : ""} title="Edit Contact">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="delete-btn" ${id ? `data-id="${id}"` : ""} title="Delete Contact">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    `;
+
+            list.appendChild(row);
+        }
+
+        // EXPORT CONTACTS
+        function exportContacts() {
+            const rows = [["Name", "Email", "Phone"]];
+            document.querySelectorAll("#contactsList .contact-row").forEach((r) => {
+                const name = r.children[0].textContent.trim();
+                const email = r.children[1].textContent.trim();
+                const phone = r.children[2].textContent.trim();
+                rows.push([name, email, phone]);
+            });
+
+            const csvContent = rows.map((r) => r.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "contacts.csv";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Toggle favorite
+        document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("favorite-btn") || e.target.closest(".favorite-btn")) {
+                const button = e.target.classList.contains("favorite-btn") ? e.target : e.target.closest(".favorite-btn");
+                const contactId = button.getAttribute("data-id");
+                toggleFavorite(contactId, button);
+            }
+        });
+
+        async function toggleFavorite(id, button) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/contacts/${id}/favorite`, {
+                    method: "PATCH",
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (response.ok) {
+                    const updatedContact = await response.json();
+                    // Update the star color
+                    const icon = button.querySelector("i");
+                    icon.style.color = updatedContact.is_favorite ? 'gold' : 'gray';
+                    // Update the favorite star in the row
+                    const row = button.closest(".contact-row");
+                    const starCell = row.children[4];
+                    starCell.textContent = updatedContact.is_favorite ? "★" : "";
+                    // Update stats
+                    fetchStats();
+                } else {
+                    alert("Error toggling favorite");
+                }
+            } catch (error) {
+                console.error("Error toggling favorite:", error);
+                alert("Error toggling favorite");
+            }
+        }
+
+        // Animation observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add("visible");
+                observer.unobserve(entry.target);
+            });
+        }, { threshold: 0.1 });
+
+        // Observe elements with animate-on-scroll class
+        document.querySelectorAll(".animate-on-scroll").forEach((el) => {
+            observer.observe(el);
+        });
+
+        // Unified delete modal handling for all contacts
+        let contactToDelete = null;
+
+        document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("delete-btn") || e.target.closest(".delete-btn")) {
+                const button = e.target.classList.contains("delete-btn") ? e.target : e.target.closest(".delete-btn");
+                const contactId = button.getAttribute("data-id");
+                if (contactId) {
+                    contactToDelete = button.closest(".contact-row");
+                    document.getElementById("deleteModal").style.display = "flex";
+                } else {
+                    if (confirm("Delete this contact?")) {
+                        button.closest(".contact-row").remove();
+                    }
+                }
+            }
+        });
+
+        document.getElementById("cancelDelete").addEventListener("click", () => {
+            document.getElementById("deleteModal").style.display = "none";
+            contactToDelete = null;
+        });
+
+        document.getElementById("confirmDelete").addEventListener("click", async () => {
+            if (contactToDelete) {
+                const contactId = contactToDelete.querySelector(".delete-btn").getAttribute("data-id");
+                try {
+                    const response = await fetch(`http://localhost:3000/api/contacts/${contactId}`, {
+                        method: "DELETE",
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (response.ok) {
+                        contactToDelete.remove();
+                        fetchStats();
+                    } else {
+                        alert("Error deleting contact");
+                    }
+                } catch (error) {
+                    console.error("Error deleting contact:", error);
+                    alert("Error deleting contact");
+                }
+                contactToDelete = null;
+                document.getElementById("deleteModal").style.display = "none";
+            }
+        });
+    </script>
+</body>
+
+</html>

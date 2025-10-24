@@ -1,0 +1,459 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    --primary: #4361ee;
+    --secondary: #3a0ca3;
+    --accent: #7209b7;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --success: #4cc9f0;
+    --danger: #ef233c;
+    --warning: #fca311;
+    --gray: #adb5bd;
+    --transition: all 0.3s ease;
+}
+
+body {
+    background-color: #f0f2f5;
+    color: var(--dark);
+    line-height: 1.6;
+}
+
+/* Header Styles */
+.header {
+    background: linear-gradient(to right, #2a0606, #4787b5);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.navbar ul {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.navbar a:hover {
+    color: var(--warning);
+}
+
+/* Contacts Page Styles */
+.contacts-page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.contacts-header {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.contacts-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--secondary);
+}
+
+.actions-bar {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.actions-bar input,
+.actions-bar select {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.actions-bar input {
+    flex: 1;
+    min-width: 250px;
+}
+
+.actions-bar select {
+    min-width: 150px;
+}
+
+.btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+}
+
+.btn.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn.danger {
+    background: var(--danger);
+}
+
+.btn.danger:hover {
+    background: #d90429;
+}
+
+/* Contacts Grid */
+.contacts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.contact-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.fav-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--warning);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem;
+    display: block;
+    border: 3px solid var(--light);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contact-card h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--secondary);
+}
+
+.contact-card h3 a {
+    color: var(--secondary);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.contact-card h3 a:hover {
+    color: var(--primary);
+}
+
+.contact-card p {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-card p i {
+    color: var(--primary);
+    width: 20px;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+/* Edit Panel */
+.edit-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    overflow-y: auto;
+    transition: var(--transition);
+    z-index: 1000;
+}
+
+.edit-panel.active {
+    right: 0;
+}
+
+.edit-panel h2 {
+    margin-bottom: 1.5rem;
+    color: var(--secondary);
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.input-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.character-counter {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-size: 12px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.input-group label input[type="radio"],
+.input-group label input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.input-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.input-group label:not(:first-child) {
+    margin-bottom: 0;
+}
+
+#imageDropArea {
+    border: 2px dashed var(--gray);
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 8px;
+}
+
+#imageDropArea:hover,
+#imageDropArea.dragover {
+    border-color: var(--primary);
+    background-color: var(--light);
+}
+
+#imagePreview img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.contact-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.contact-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.contact-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.contact-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.contact-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.contact-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.hamburger .bar {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 3px 0;
+    transition: var(--transition);
+}
+
+.hamburger.active .bar:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.hamburger.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .bar:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+}
+
+.nav-menu li {
+    position: relative;
+}
+
+.nav-menu a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.nav-menu a:hover {
+    color: var(--warning);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 70px;
+        flex-direction: column;
+        background-color: #2a0606;
+        width: 100%;
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+        padding: 2rem 0;
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actions-bar input,
+    .actions-bar select {
+        width: 100%;
+    }
+
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-panel {
+        width: 100%;
+        right: -100%;
+    }
+}
